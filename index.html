@@ -14,6 +14,10 @@
     .logo { display:inline-grid; place-items:center; width:76px; height:76px; border-radius:25px; background:var(--coral); color:white; font-size:38px; box-shadow:0 10px 28px #ff665b35; }
     h1 { margin:18px 0 4px; font-size:clamp(30px,6vw,46px); line-height:1.15; }
     .subtitle,.date { color:var(--muted); }
+    .languages { display:inline-flex; gap:6px; margin:22px 0 0; padding:5px; border:1px solid var(--line); border-radius:18px; background:var(--card); }
+    .languages button { border:0; border-radius:13px; padding:9px 16px; background:transparent; color:var(--muted); font:600 15px/1 system-ui,-apple-system,"Segoe UI",sans-serif; cursor:pointer; }
+    .languages button.active { background:var(--coral); color:white; box-shadow:0 5px 14px #ff665b30; }
+    [hidden] { display:none !important; }
     article { background:var(--card); border:1px solid var(--line); border-radius:30px; padding:clamp(24px,5vw,48px); box-shadow:0 8px 28px #593b2312; }
     h2 { margin:32px 0 8px; font-size:22px; }
     h2:first-child { margin-top:0; }
@@ -28,11 +32,15 @@
   <main>
     <header>
       <div class="logo" aria-hidden="true">钥</div>
-      <h1>Политика конфиденциальности</h1>
-      <div class="subtitle">Приложение «Ключи Китая»</div>
-      <div class="date">Действует с 18 августа 2026 года</div>
+      <h1 id="page-title">Политика конфиденциальности</h1>
+      <div class="subtitle" id="page-subtitle">Приложение «Ключи Китая»</div>
+      <div class="date" id="page-date">Действует с 18 августа 2026 года</div>
+      <nav class="languages" aria-label="Language selection">
+        <button type="button" data-language="ru" class="active" aria-pressed="true">Русский</button>
+        <button type="button" data-language="en" aria-pressed="false">English</button>
+      </nav>
     </header>
-    <article>
+    <article id="content-ru" lang="ru">
       <h2>Локальные данные</h2>
       <p>Приложение хранит имя, выбранное обращение, настройки и учебный прогресс локально на устройстве. Разработчик не получает эти сведения и не создаёт пользовательские аккаунты.</p>
 
@@ -58,7 +66,74 @@
 
       <div class="note"><strong>Связаться с разработчиком:</strong><br><a href="mailto:raccoon.app.labs@gmail.com">raccoon.app.labs@gmail.com</a></div>
     </article>
-    <footer>© 2026 «Ключи Китая»</footer>
+    <article id="content-en" lang="en" hidden>
+      <h2>Data stored locally</h2>
+      <p>The app stores the user's name, preferred form of address, settings, and learning progress locally on the device. The developer does not receive this information and does not create user accounts.</p>
+
+      <h2>Microphone and speech recognition</h2>
+      <p>Microphone permission is used only after an explicit user action in a pronunciation exercise. Audio is passed to the system speech recognition service selected on the device. The app does not store audio files or send them to the developer.</p>
+
+      <h2>Advertising</h2>
+      <p>The app uses Yandex Mobile Ads SDK to display advertising. The advertising SDK may process device or advertising identifiers, advertising interaction data, diagnostics, and other technical information in accordance with the Yandex Privacy Policy and the consent selected by the user.</p>
+
+      <h2>Analytics</h2>
+      <p>The app uses MyTracker SDK to analyze app usage and measure user acquisition effectiveness. It may process device and app identifiers, device and network information, launches, sessions, and in-app interactions.</p>
+      <p>Custom analytics events do not contain the user's name, preferred form of address, search queries, handwriting paths, audio recordings, or speech recognition results. Location tracking is not enabled in MyTracker settings.</p>
+
+      <h2>Location</h2>
+      <p>The app does not request precise or approximate location.</p>
+
+      <h2>Data deletion</h2>
+      <p>Users can delete locally stored data by clearing the app's data in the device settings or by uninstalling the app.</p>
+
+      <h2>Third-party policies</h2>
+      <p><a href="https://yandex.com/legal/confidential/" rel="noopener noreferrer">Yandex Privacy Policy</a></p>
+      <p><a href="https://docs.tracker.my.com/en/privacy-and-security/about" rel="noopener noreferrer">MyTracker Privacy and Security</a></p>
+
+      <div class="note"><strong>Contact the developer:</strong><br><a href="mailto:raccoon.app.labs@gmail.com">raccoon.app.labs@gmail.com</a></div>
+    </article>
+    <footer id="page-footer">© 2026 «Ключи Китая»</footer>
   </main>
+  <script>
+    const copies = {
+      ru: {
+        title: 'Политика конфиденциальности',
+        subtitle: 'Приложение «Ключи Китая»',
+        date: 'Действует с 18 августа 2026 года',
+        footer: '© 2026 «Ключи Китая»'
+      },
+      en: {
+        title: 'Privacy Policy',
+        subtitle: 'Chinese Keys app',
+        date: 'Effective August 18, 2026',
+        footer: '© 2026 Chinese Keys'
+      }
+    };
+
+    function setLanguage(language) {
+      const selected = language === 'en' ? 'en' : 'ru';
+      document.documentElement.lang = selected;
+      document.title = selected === 'en'
+        ? 'Privacy Policy — Chinese Keys'
+        : 'Политика конфиденциальности — Ключи Китая';
+      document.getElementById('content-ru').hidden = selected !== 'ru';
+      document.getElementById('content-en').hidden = selected !== 'en';
+      document.getElementById('page-title').textContent = copies[selected].title;
+      document.getElementById('page-subtitle').textContent = copies[selected].subtitle;
+      document.getElementById('page-date').textContent = copies[selected].date;
+      document.getElementById('page-footer').textContent = copies[selected].footer;
+      document.querySelectorAll('[data-language]').forEach(button => {
+        const active = button.dataset.language === selected;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      localStorage.setItem('privacy-language', selected);
+    }
+
+    document.querySelectorAll('[data-language]').forEach(button => {
+      button.addEventListener('click', () => setLanguage(button.dataset.language));
+    });
+    setLanguage(localStorage.getItem('privacy-language') || (navigator.language.startsWith('ru') ? 'ru' : 'en'));
+  </script>
 </body>
 </html>
